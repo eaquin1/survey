@@ -26,6 +26,7 @@ def begin(q_id):
 
 @app.route('/answer', methods=["POST"])
 def add_answer():
-    answer = request.args.get("choice")
+    answer = request.form["choice"]
+    print(answer)
     responses.append(answer)
-    return redirect("/question/1")
+    return redirect(f"/question/{len(responses)}")
