@@ -3,13 +3,15 @@
 {% block title %}Questions{% endblock %}
 
 {% block content%}
+
 <h2>Please answer the following question:</h2>
 
 {{question}}
 <form action="/answer" method="POST">
+
 {% for choice in choices %}
     <label for="{{choice}}">{{choice}}</label>
-        <input type="radio" id="{{choice}}" name="choice" value="{{choice}}">
+        <p><input type="radio" id="{{choice}}" name="choice" value="{{choice}}"></p>
 {% endfor %}
     <button>Continue</button>
 </form>

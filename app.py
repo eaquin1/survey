@@ -20,7 +20,6 @@ def starter_page():
 def add_answer():
     answer = request.form["choice"]
     responses.append(answer)
-    print(responses)
     if len(responses) == len(satisfaction_survey.questions):
         return redirect("/thanks")
     else:
@@ -30,7 +29,12 @@ def add_answer():
 def begin(q_id):
     """Render question page"""
 
+    if (responses is None):
+        # trying to access question page too soon
+        return redirect("/")
+    
     if (len(responses) != q_id):
+        flash(f"Invalid question id: {q_id}")
         return redirect(f"/question/{len(responses)}")
 
     q = satisfaction_survey.questions[q_id]
