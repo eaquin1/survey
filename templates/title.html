@@ -5,7 +5,7 @@
 {% block content %}
 <h2>{{survey_title}}</h2>
 <p>{{instructions}}</p>
-<form action="/question/0">
+<form action="/session" method="POST">
     <button>Start!</button>
 </form>
 {% endblock %}
