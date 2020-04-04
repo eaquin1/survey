@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash, session
+from flask import Flask, request, render_template, redirect, flash, session, make_response
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import surveys
 
@@ -24,8 +24,14 @@ def starter_page():
 def pick_survey():
     """Select a survey"""
     survey_id = request.form["survey_code"]
+
+    # don't let them re-take a survey until cookie times out
+    if request.cookies.get(f"completed_{survey_id}"):
+        return render_template("already-done.html")
+
     survey = surveys[survey_id]
     session[current_survey_key] = survey_id
+    
     return render_template("survey_start.html", survey=survey)
 
 @app.route('/begin', methods=["POST"])
@@ -41,12 +47,17 @@ def add_answer():
     """Save the response and redirect to the next question"""
     # get the response choice
     answer = request.form["choice"]
-
+    text = request.form.get("text", "")
+    
+    # add this response to the list of the session
     responses = session[responses_key]
-    responses.append(answer)
+    responses.append({"answer": answer, "text": text})
+    
+    # add this response to the session
     session[responses_key] = responses
     survey_code = session[current_survey_key]
     survey = surveys[survey_code]
+
     if len(responses) == len(survey.questions):
         return redirect("/thanks")
     else:
@@ -69,8 +80,19 @@ def begin(q_id):
     q = survey.questions[q_id]
     question = q.question
     choices = q.choices
-    return render_template('question.html', question_num=q_id, question=question, choices=choices)
+    allow_text = q.allow_text
+    return render_template('question.html', question_num=q_id, question=question, choices=choices, allow_text=allow_text)
 
 @app.route('/thanks')
 def thanks():
-    return render_template('thanks.html')
+    """Thank the user and list responses"""
+
+    survey_id = session[current_survey_key]
+    survey = surveys[survey_id]
+    responses = session[responses_key]
+
+    html = render_template("thanks.html", survey=survey, responses=responses)
+    # Set cookie that this survey is complete so they can't redo it
+    response = make_response(html)
+    response.set_cookie(f"completed_{survey_id}", "yes", max_age=60)
+    return response

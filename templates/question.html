@@ -13,6 +13,9 @@
     <label for="{{choice}}">{{choice}}</label>
         <p><input type="radio" id="{{choice}}" name="choice" value="{{choice}}"></p>
 {% endfor %}
+{% if allow_text %}
+    <textarea name="text" cols="30" rows="10"></textarea>
+{% endif %}
     <button>Continue</button>
 </form>
 {% endblock %}
